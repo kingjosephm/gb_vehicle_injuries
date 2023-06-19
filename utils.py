@@ -69,6 +69,15 @@ def read_data() -> pd.DataFrame:
 
         df = pd.concat([df, df_], axis=0)  # concat years together
 
+    # Engineer datetime features
+    df['datetime'] = pd.to_datetime(df['date'] + ' ' + df['time'])
+    df.drop(columns=['date', 'time'], inplace=True)
+    df['month'] = df['datetime'].dt.month
+    df['day'] = df['datetime'].dt.day
+    df['dayw'] = df['datetime'].dt.dayofweek
+    df['hour'] = df['datetime'].dt.hour
+    df['elapsed_time'] = (df['datetime'] - df['datetime'].min()).dt.total_seconds()  # total seconds since first timestamp
+
     return df
 
 def accident_reference_fix(series: pd.Series) -> pd.Series:
