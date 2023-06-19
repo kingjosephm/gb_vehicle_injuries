@@ -49,6 +49,7 @@ def read_data() -> pd.DataFrame:
             vehicle[col] = np.where(vehicle[col] == 3, -1, vehicle[col])
 
         # Aggregate casualty data from person to vehicle
+        casualty = vehicle[['accident_reference', 'vehicle_reference']].merge(casualty, how='left')  # include vehicles with no injuries
         casualty = aggregate_casualty_data(casualty)
 
         # Merge vehicle w/casualty info
@@ -69,9 +70,16 @@ def read_data() -> pd.DataFrame:
 
 def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Aggregates casualty dataset from person-level up to vehicle-level
-    :param df:
+    Aggregates casualty dataset from person-level up to vehicle-level. Creates new categories for vehicles with no
+        casualties for fields ['casualty_class', 'casualty_severity']
+    :param df: pd.DataFrame
     """
+    # Insert new categories in ['casualty_class', 'casualty_severity'] for vehicles with no casualties
+    df['casualty_class'] = np.where(df['casualty_class'].isna(), 0, df['casualty_class'])
+    df['casualty_severity'] = np.where(df['casualty_severity'].isna(), 4, df['casualty_severity'])
+    for col in ['casualty_class', 'casualty_severity']:
+        df[col] = df[col].astype(int)
+
     # Share of males among casualties, non-missing only
     df['sex_of_casualty'] = np.where(df['sex_of_casualty'] == 9, -1, df['sex_of_casualty'])
     df['sex_of_casualty'].replace({2: 0}, inplace=True)
@@ -107,8 +115,7 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.fillna(-1)
 
     # Total casualties
-    # Total casualties
-    df['casualty_total'] = df[[i for i in df.columns if 'casualty_severity' in i]].sum(axis=1)
+    df['casualty_total'] = df[[i for i in df.columns if 'casualty_class' in i]].sum(axis=1)
 
     return df
 
