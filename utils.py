@@ -54,17 +54,32 @@ def read_data() -> pd.DataFrame:
         for col in ['speed_limit', 'junction_detail']:
             accident[col] = np.where(accident[col] == 99, -1, accident[col])
 
+        # Convert `accident_reference` to object type, if not already, ensuring maintains leading zero if too few digits
+        accident['accident_reference'] = accident_reference_fix(accident['accident_reference'])
+        vehicle['accident_reference'] = accident_reference_fix(vehicle['accident_reference'])
+        casualty['accident_reference'] = accident_reference_fix(casualty['accident_reference'])
+
         # Aggregate casualty data from person to vehicle
         casualty = vehicle[['accident_reference', 'vehicle_reference']].merge(casualty, how='left')  # include vehicles with no injuries
         casualty = aggregate_casualty_data(casualty)
 
         # Merge vehicle w/casualty info and accident info
         df_ = vehicle.merge(casualty, on=['accident_reference', 'vehicle_reference'], how='left')
-        df_ = df_.merge(accident, on='accident_reference', how='inner')  # note - 2020 accident data doesn't merge properly
+        df_ = df_.merge(accident, on='accident_reference', how='inner')  # note - merge rate not quite 100%
 
         df = pd.concat([df, df_], axis=0)  # concat years together
 
     return df
+
+def accident_reference_fix(series: pd.Series) -> pd.Series:
+    """
+    Adds leading zeros to column `accident_reference`, which pd.read_csv might incorrectly read as int dtype column
+    :param series: pd.Series
+    :return: pd.Series
+    """
+    series = series.astype('O')  # if not already
+    # Ensure all length 9
+    return series.apply(lambda x: x.zfill(9))
 
 def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     """
