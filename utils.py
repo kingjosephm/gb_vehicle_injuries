@@ -57,19 +57,9 @@ def read_data() -> pd.DataFrame:
         casualty = vehicle[['accident_reference', 'vehicle_reference']].merge(casualty, how='left')  # include vehicles with no injuries
         casualty = aggregate_casualty_data(casualty)
 
-        # Merge vehicle w/casualty info
+        # Merge vehicle w/casualty info and accident info
         df = vehicle.merge(casualty, on=['accident_reference', 'vehicle_reference'], how='left')
-
-        df = df.iloc[:, :].merge(accident, on='accident_reference', how='left')
-
-
-    '''
-    # Verify:
-        number_of_vehicles in accident == unique vehicles per accident_reference
-        we have casualty_severity for each vehicle
-        numbers align between datasets
-        casualty_class ~= casualty_type
-    '''
+        df = df.merge(accident, on='accident_reference', how='left')
 
     return df
 
@@ -145,7 +135,8 @@ def cols_to_drop() -> Dict:
             'lsoa_of_accident_location',  # surrogate for latitude/longitude
             'trunk_road_flag',
             'first_road_number',
-            'second_road_number'
+            'second_road_number',
+            'local_authority_highway',
             'number_of_casualties'],  # want to calculate own removing pedestrians
 
         'vehicle':
