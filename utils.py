@@ -11,6 +11,7 @@ def read_data() -> pd.DataFrame:
 
     :return:
     """
+    df = pd.DataFrame()
     for i in range(2019, 2022):
 
         # Read data & drop select columns
@@ -58,8 +59,10 @@ def read_data() -> pd.DataFrame:
         casualty = aggregate_casualty_data(casualty)
 
         # Merge vehicle w/casualty info and accident info
-        df = vehicle.merge(casualty, on=['accident_reference', 'vehicle_reference'], how='left')
-        df = df.merge(accident, on='accident_reference', how='left')
+        df_ = vehicle.merge(casualty, on=['accident_reference', 'vehicle_reference'], how='left')
+        df_ = df_.merge(accident, on='accident_reference', how='inner')  # note - 2020 accident data doesn't merge properly
+
+        df = pd.concat([df, df_], axis=0)  # concat years together
 
     return df
 
@@ -137,6 +140,7 @@ def cols_to_drop() -> Dict:
             'first_road_number',
             'second_road_number',
             'local_authority_highway',
+            'day_of_week',
             'number_of_casualties'],  # want to calculate own removing pedestrians
 
         'vehicle':
@@ -144,7 +148,8 @@ def cols_to_drop() -> Dict:
             'age_band_of_driver',
             'vehicle_direction_from',
             'vehicle_direction_to',
-            'generic_make_model'],
+            'generic_make_model',
+            'lsoa_of_driver'],
 
         'casualty':
             ['accident_index',
