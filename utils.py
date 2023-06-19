@@ -2,7 +2,7 @@ import pandas as pd
 from typing import Dict
 import numpy as np
 
-pd.set_option('display.max_rows', 50)
+pd.set_option('display.max_rows', 150)
 pd.set_option('display.max_columns', 150)
 
 
@@ -47,6 +47,11 @@ def read_data() -> pd.DataFrame:
             vehicle[col] = np.where(vehicle[col] == 6, -1, vehicle[col])
         for col in ['sex_of_driver']:
             vehicle[col] = np.where(vehicle[col] == 3, -1, vehicle[col])
+        for col in ['road_type', 'junction_control', 'weather_conditions', 'road_surface_conditions',
+                    'special_conditions_at_site', 'carriageway_hazards']:
+            accident[col] = np.where(accident[col] == 9, -1, accident[col])
+        for col in ['speed_limit', 'junction_detail']:
+            accident[col] = np.where(accident[col] == 99, -1, accident[col])
 
         # Aggregate casualty data from person to vehicle
         casualty = vehicle[['accident_reference', 'vehicle_reference']].merge(casualty, how='left')  # include vehicles with no injuries
