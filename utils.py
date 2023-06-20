@@ -136,6 +136,15 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.merge(casualty_share_male, how='left')
     df = df.merge(casualty_mean_age, how='left')
 
+    # Recode & consolidate casualty_worst down to 3 classes
+    recode_casualty_worst = {
+        4: 0,
+        3: 1,
+        2: 1,
+        1: 2
+    }
+    df['casualty_worst'] = df['casualty_worst'].replace(recode_casualty_worst)
+
     # Fill missings, if any
     df = df.fillna(-1)
 
