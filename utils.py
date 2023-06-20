@@ -8,8 +8,8 @@ pd.set_option('display.max_columns', 150)
 
 def read_data() -> pd.DataFrame:
     """
-
-    :return:
+    Reads 3 years of data from disk (requires downloading manually ahead of time to ./data) and preprocesses.
+    :return: pd.DataFrame
     """
     df = pd.DataFrame()
     for i in range(2019, 2022):
