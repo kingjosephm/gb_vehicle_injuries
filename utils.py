@@ -138,10 +138,10 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Recode & consolidate casualty_worst down to 3 classes
     recode_casualty_worst = {
-        4: 0,
-        3: 1,
-        2: 1,
-        1: 2
+        4: 0,  # orig no injury
+        3: 0,  # orig slight injury
+        2: 1,  # orig severe injury
+        1: 1  # orig fatality
     }
     df['casualty_worst'] = df['casualty_worst'].replace(recode_casualty_worst)
 
