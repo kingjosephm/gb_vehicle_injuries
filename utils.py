@@ -237,6 +237,3 @@ def recode_vehicle_type() -> Dict:
         98: 19,
         99: -1
     }
-
-if __name__ == '__main__':
-    read_data()
