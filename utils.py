@@ -22,22 +22,15 @@ def read_data() -> pd.DataFrame:
         casualty = pd.read_csv(f"./data/dft-road-casualty-statistics-casualty-{i}.csv", low_memory=False)
         casualty = drop_columns(casualty, 'casualty')
 
-        # Verify missings all coded as '-1'
-        assert vehicle.isnull().sum().sum() == 0
-        assert casualty.isnull().sum().sum() == 0
-
         #######################
         ###### Data Mods  #####
         #######################
-
-        # Recode missing latitude & longitude in accident dataset to -999
-        for col in ['longitude', 'latitude']:
-            accident[col] = np.where(accident[col].isnull(), -999, accident[col])
 
         # Recode vehicle type
         vehicle['vehicle_type'] = vehicle['vehicle_type'].replace(recode_vehicle_type())
 
         # Recode unknowns to missing
+        # Note - I initially coded missings as -1, but LGBM handles np.NaN natively, so I convert them to this below
         for col in ['towing_and_articulation', 'junction_location', 'skidding_and_overturning',
                     'vehicle_leaving_carriageway', 'first_point_of_impact', 'vehicle_left_hand_drive']:
             vehicle[col] = np.where(vehicle[col] == 9, -1, vehicle[col])
@@ -80,6 +73,9 @@ def read_data() -> pd.DataFrame:
 
     # Sort final data
     df = df.sort_values(by=['accident_year', 'accident_reference', 'vehicle_reference']).reset_index(drop=True)
+
+    # Convert all missings, -1, as np.NaN
+    df = df.replace({-1: np.NaN})
 
     return df
 
@@ -220,7 +216,7 @@ def drop_columns(df: pd.DataFrame, df_type: str) -> pd.DataFrame:
 def recode_vehicle_type() -> Dict:
     """
     Aggregates some vehicle codes in column `vehicle_type` for lower dimensionality. Codes:
-        -1: missing
+        np.NaN: missing
         1: bicycle, e-scooters
         2: motorcycle, all types
         8: taxi/hire car
@@ -232,6 +228,7 @@ def recode_vehicle_type() -> Dict:
     :return: Dict
     """
     return {
+        -1: np.NaN,
         3: 2,  # all motorcycles are 2
         4: 2,
         5: 2,
@@ -244,5 +241,5 @@ def recode_vehicle_type() -> Dict:
         23: 2,
         97: 2,
         98: 19,
-        99: -1
+        99: np.NaN
     }
