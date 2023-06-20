@@ -78,6 +78,9 @@ def read_data() -> pd.DataFrame:
     df['hour'] = df['datetime'].dt.hour
     df['elapsed_time'] = (df['datetime'] - df['datetime'].min()).dt.total_seconds()  # total seconds since first timestamp
 
+    # Sort final data
+    df = df.sort_values(by=['accident_year', 'accident_reference', 'vehicle_reference']).reset_index(drop=True)
+
     return df
 
 def accident_reference_fix(series: pd.Series) -> pd.Series:
