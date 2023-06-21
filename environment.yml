@@ -25,6 +25,7 @@ dependencies:
   - certifi=2023.5.7
   - cffi=1.15.1
   - charset-normalizer=2.0.4
+  - cloudpickle=2.2.1
   - comm=0.1.2
   - contourpy=1.0.5
   - cryptography=39.0.1
@@ -74,6 +75,7 @@ dependencies:
   - libgfortran=5.0.0
   - libgfortran5=11.3.0
   - libiconv=1.16
+  - libllvm14=14.0.6
   - libpng=1.6.39
   - libsodium=1.0.18
   - libtiff=4.5.0
@@ -83,6 +85,7 @@ dependencies:
   - libxslt=1.1.37
   - lightgbm=3.3.5
   - llvm-openmp=14.0.6
+  - llvmlite=0.40.0
   - lxml=4.9.2
   - lz4-c=1.9.4
   - markupsafe=2.1.1
@@ -103,6 +106,7 @@ dependencies:
   - nest-asyncio=1.5.6
   - notebook=6.5.4
   - notebook-shim=0.2.2
+  - numba=0.57.0
   - numexpr=2.8.4
   - numpy=1.24.3
   - numpy-base=1.24.3
@@ -144,7 +148,9 @@ dependencies:
   - seaborn=0.12.2
   - send2trash=1.8.0
   - setuptools=67.8.0
+  - shap=0.41.0
   - six=1.16.0
+  - slicer=0.0.7
   - sniffio=1.2.0
   - soupsieve=2.4
   - sqlite=3.41.2
@@ -156,6 +162,7 @@ dependencies:
   - tk=8.6.12
   - tomli=2.0.1
   - tornado=6.2
+  - tqdm=4.65.0
   - traitlets=5.7.1
   - typing-extensions=4.6.3
   - typing_extensions=4.6.3
@@ -181,5 +188,4 @@ dependencies:
       - mako==1.2.4
       - optuna==3.2.0
       - sqlalchemy==2.0.16
-      - tqdm==4.65.0
 prefix: /Users/josephking/miniconda3/envs/gb_vehicle_injuries
