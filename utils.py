@@ -111,6 +111,13 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     casualty_mean_age = df[df['age_of_casualty'] != -1].groupby(['accident_reference', 'vehicle_reference'])\
         ['age_of_casualty'].mean().reset_index().rename(columns={'age_of_casualty': 'casualty_mean_age'})
 
+    # Casualty type, i.e. what did this vehicle hit (note - must explicitly exclude missings here)
+    df['casualty_type'] = df['casualty_type'].replace(recode_vehicle_type())
+    casualty_modal_type = df[(df['casualty_type'] != -1) & (df['casualty_type'].notnull())]\
+        .groupby(['accident_reference', 'vehicle_reference'])\
+        ['casualty_type'].agg(lambda x: pd.Series.mode(x)[0]).astype(int).reset_index()\
+        .rename(columns={'casualty_type': 'casualty_modal_type'})
+
     # Main variable to predict: worst casualty of vehicle, either in vehicle itself or pedestrian
     casualty_worst = df.groupby(['accident_reference', 'vehicle_reference'])['casualty_severity'].min().reset_index()\
         .rename(columns={'casualty_severity': 'casualty_worst'})
@@ -122,13 +129,15 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
                              prefix=col)  # note - verified above no missings, so no need to create separate dummies for them
         dummies = pd.concat([dummies, dum], axis=1)
     df = pd.concat([df, dummies], axis=1)
-    df.drop(columns=['casualty_reference', 'casualty_class', 'sex_of_casualty', 'age_of_casualty', 'casualty_severity'], inplace=True)
+    df.drop(columns=['casualty_reference', 'casualty_class', 'sex_of_casualty',
+                     'age_of_casualty', 'casualty_severity', 'casualty_type'], inplace=True)
 
     # Actual aggregation
     df = df.groupby(['accident_reference', 'vehicle_reference']).sum().reset_index()
 
     # Concat aggregated columns
     df = df.merge(casualty_worst, how='left')
+    df = df.merge(casualty_modal_type, how='left')
     df = df.merge(casualty_share_male, how='left')
     df = df.merge(casualty_mean_age, how='left')
 
@@ -193,7 +202,6 @@ def cols_to_drop() -> Dict:
             'casualty_home_area_type',
             'lsoa_of_casualty',
             'bus_or_coach_passenger',
-            'casualty_type',
             'car_passenger',
             'age_band_of_casualty']
     }
@@ -215,8 +223,8 @@ def drop_columns(df: pd.DataFrame, df_type: str) -> pd.DataFrame:
 
 def recode_vehicle_type() -> Dict:
     """
-    Aggregates some vehicle codes in column `vehicle_type` for lower dimensionality. Codes:
-        np.NaN: missing
+    Aggregates vehicle codes in column `vehicle_type` and `casualty_type` for lower dimensionality. Codes:
+        -1: missing
         1: bicycle, e-scooters
         2: motorcycle, all types
         8: taxi/hire car
@@ -225,10 +233,11 @@ def recode_vehicle_type() -> Dict:
         18: trams
         19: vans/goods vehicles
         90: other, including horse, agricultural
+        np.NaN: (optional) applies to the case of `casualty_type` feature, since these are vehicles with no casualties
     :return: Dict
     """
     return {
-        -1: np.NaN,
+        -1: -1,  # missing
         3: 2,  # all motorcycles are 2
         4: 2,
         5: 2,
@@ -241,5 +250,5 @@ def recode_vehicle_type() -> Dict:
         23: 2,
         97: 2,
         98: 19,
-        99: np.NaN
+        99: -1
     }
