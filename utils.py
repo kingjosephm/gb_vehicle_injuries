@@ -105,8 +105,8 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     :param df: pd.DataFrame
     """
     # Insert new categories in ['casualty_class', 'casualty_severity'] for vehicles with no casualties
-    df['casualty_class'] = np.where(df['casualty_class'].isna(), 0, df['casualty_class'])
-    df['casualty_severity'] = np.where(df['casualty_severity'].isna(), 4, df['casualty_severity'])
+    df['casualty_class'] = np.where(df['casualty_class'].isna(), 0, df['casualty_class'])  # 0 = no casualty
+    df['casualty_severity'] = np.where(df['casualty_severity'].isna(), 4, df['casualty_severity'])  # 4 = non-injury
     for col in ['casualty_class', 'casualty_severity']:
         df[col] = df[col].astype(int)
 
@@ -168,9 +168,6 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Fill missings, if any
     df = df.fillna(-1)
-
-    # Total casualties
-    df['casualty_total'] = df[[i for i in df.columns if 'casualty_class' in i]].sum(axis=1)
 
     return df
 
@@ -326,6 +323,5 @@ def numerical_features() -> List:
                 'longitude',
                 'latitude',
                 'number_of_vehicles',
-                'speed_limit',
-                'casualty_total'
+                'speed_limit'
             ]
