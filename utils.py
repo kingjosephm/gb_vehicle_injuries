@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict
+from typing import Dict, List
 import numpy as np
 
 pd.set_option('display.max_rows', 150)
@@ -79,6 +79,12 @@ def read_data() -> pd.DataFrame:
 
     # Convert all missings, -1, as np.NaN
     df = df.replace({-1: np.NaN})
+
+    # Convert categorical features to categorical data type
+    cats = categorical_features()
+    numerics = numerical_features()
+    df[cats] = df[cats].astype('category')
+    df = df[cats+numerics+['casualty_worst']]
 
     return df
 
@@ -272,3 +278,61 @@ def recode_vehicle_type() -> Dict:
         98: 19,
         99: -1
     }
+
+def categorical_features() -> List:
+    """
+    Returns a list of categorical features in data
+    :return: list
+    """
+    return [
+                'vehicle_type',
+                'casualty_modal_type',
+                'towing_and_articulation',
+                'vehicle_manoeuvre',
+                'junction_location',
+                'skidding_and_overturning',
+                'hit_object_in_carriageway',
+                'vehicle_leaving_carriageway',
+                'vehicle_location_restricted_lane',
+                'hit_object_off_carriageway',
+                'first_point_of_impact',
+                'vehicle_left_hand_drive',
+                'journey_purpose_of_driver',
+                'sex_of_driver',
+                'propulsion_code',
+                'driver_imd_decile',
+                'driver_home_area_type',
+                'local_authority_district',
+                'road_type',
+                'junction_control',
+                'light_conditions',
+                'weather_conditions',
+                'road_surface_conditions',
+                'special_conditions_at_site',
+                'carriageway_hazards',
+                'urban_or_rural_area'
+            ]
+
+def numerical_features() -> List:
+    """
+    Returns a list of numerical features in data
+    :return: list
+    """
+    return [
+                'accident_year',
+                'month',
+                'day',
+                'dayw',
+                'hour',
+                'elapsed_time',
+                'age_of_driver',
+                'engine_capacity_cc',
+                'age_of_vehicle',
+                'casualty_share_male',
+                'casualty_mean_age',
+                'longitude',
+                'latitude',
+                'number_of_vehicles',
+                'speed_limit',
+                'casualty_total'
+            ]
