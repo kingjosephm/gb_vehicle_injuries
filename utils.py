@@ -44,7 +44,7 @@ def read_data() -> pd.DataFrame:
         for col in ['road_type', 'junction_control', 'weather_conditions', 'road_surface_conditions',
                     'special_conditions_at_site', 'carriageway_hazards']:
             accident[col] = np.where(accident[col] == 9, -1, accident[col])
-        for col in ['speed_limit', 'junction_detail']:
+        for col in ['speed_limit']:
             accident[col] = np.where(accident[col] == 99, -1, accident[col])
 
         # Convert `accident_reference` to object type, if not already, ensuring maintains leading zero if too few digits
@@ -182,6 +182,9 @@ def cols_to_drop() -> Dict:
             'second_road_number',
             'local_authority_highway',
             'day_of_week',
+            'first_class_road',
+            'second_class_road',
+            'junction_detail',
             'number_of_casualties'],  # want to calculate own removing pedestrians
 
         'vehicle':
