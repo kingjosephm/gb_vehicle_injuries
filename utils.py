@@ -196,8 +196,8 @@ def cols_to_drop() -> Dict:
             'second_road_number',
             'local_authority_highway',
             'day_of_week',
-            'first_class_road',
-            'second_class_road',
+            'first_road_class',
+            'second_road_class',
             'junction_detail',
             'number_of_casualties'],  # want to calculate own removing pedestrians
 
