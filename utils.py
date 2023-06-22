@@ -139,13 +139,13 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     casualty_worst = df.groupby(['accident_reference', 'vehicle_reference'])['casualty_severity'].min().reset_index()\
         .rename(columns={'casualty_severity': 'casualty_worst'})
 
-    # One-hot encode categorical variables to aggregate, yields total number of each categorical variable per vehicle
-    dummies = pd.DataFrame()
-    for col in ['casualty_class', 'casualty_severity']:
-        dum = pd.get_dummies(df[col],
-                             prefix=col)  # note - verified above no missings, so no need to create separate dummies for them
-        dummies = pd.concat([dummies, dum], axis=1)
-    df = pd.concat([df, dummies], axis=1)
+    # # One-hot encode categorical variables to aggregate, yields total number of each categorical variable per vehicle
+    # dummies = pd.DataFrame()
+    # for col in ['casualty_class', 'casualty_severity']:
+    #     dum = pd.get_dummies(df[col],
+    #                          prefix=col)  # note - verified above no missings, so no need to create separate dummies for them
+    #     dummies = pd.concat([dummies, dum], axis=1)
+    # df = pd.concat([df, dummies], axis=1)
     df.drop(columns=['casualty_reference', 'casualty_class', 'sex_of_casualty',
                      'age_of_casualty', 'casualty_severity', 'casualty_type'], inplace=True)
 
