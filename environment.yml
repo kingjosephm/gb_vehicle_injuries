@@ -110,7 +110,7 @@ dependencies:
   - numexpr=2.8.4=py310h827a554_1
   - numpy=1.24.3=py310h827a554_1
   - numpy-base=1.24.3=py310ha186be2_1
-  - openssl=3.0.8=hca72f7f_0
+  - openssl=3.0.9=hca72f7f_0
   - packaging=23.0=py310hecd8cb5_0
   - pandas=1.5.3=py310h3ea8b11_0
   - pandocfilters=1.5.0=pyhd3eb1b0_0
@@ -155,6 +155,7 @@ dependencies:
   - sqlite=3.41.2=h6c40b1e_0
   - stack_data=0.2.0=pyhd3eb1b0_0
   - tbb=2021.8.0=ha357a0b_0
+  - tenacity=8.2.2=py310hecd8cb5_0
   - terminado=0.17.1=py310hecd8cb5_0
   - threadpoolctl=2.2.0=pyh0d69192_0
   - tinycss2=1.2.1=py310hecd8cb5_0
@@ -187,6 +188,7 @@ dependencies:
       - greenlet==2.0.2
       - mako==1.2.4
       - optuna==3.2.0
+      - plotly==5.15.0
       - psutil==5.9.5
       - scikit-plot==0.3.7
       - sqlalchemy==2.0.16
