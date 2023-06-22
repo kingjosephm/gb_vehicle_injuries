@@ -46,6 +46,9 @@ def read_data() -> pd.DataFrame:
             accident[col] = np.where(accident[col] == 9, -1, accident[col])
         for col in ['speed_limit']:
             accident[col] = np.where(accident[col] == 99, -1, accident[col])
+        vehicle['journey_purpose_of_driver'] = np.where(vehicle['journey_purpose_of_driver'].isin([6, 15]),
+                                                        np.NaN,
+                                                        vehicle['journey_purpose_of_driver'])
 
         # Convert `accident_reference` to object type, if not already, ensuring maintains leading zero if too few digits
         accident['accident_reference'] = accident_reference_fix(accident['accident_reference'])
