@@ -115,37 +115,26 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     df['sex_of_casualty'].replace({2: 0}, inplace=True)
     casualty_share_male = df.groupby(['accident_reference', 'vehicle_reference'])\
         ['sex_of_casualty'].mean().reset_index().rename(columns={'sex_of_casualty': 'casualty_share_male'})
-    # Mean imputation for vehicles with no casualties (or otherwise missing)
-    casualty_share_male['casualty_share_male'] = np.where(casualty_share_male['casualty_share_male'].isnull(),
-                                                          casualty_share_male['casualty_share_male'].mean(),
-                                                          casualty_share_male['casualty_share_male'])
 
     # Mean age across casualties, non-missing only
     df['age_of_casualty'] = np.where(df['sex_of_casualty'] == -1, np.NaN, df['age_of_casualty'])
     casualty_mean_age = df.groupby(['accident_reference', 'vehicle_reference'])\
         ['age_of_casualty'].mean().reset_index().rename(columns={'age_of_casualty': 'casualty_mean_age'})
-    # Mean imputation for vehicles with no casualties (or otherwise missing)
-    casualty_mean_age['casualty_mean_age'] = np.where(casualty_mean_age['casualty_mean_age'].isnull(),
-                                                      casualty_mean_age['casualty_mean_age'].mean(),
-                                                      casualty_mean_age['casualty_mean_age'])
 
     # Casualty type, i.e. what did this vehicle hit (note - must explicitly exclude missings here)
+    # Excludes vehicle passengers
     df['casualty_type'] = df['casualty_type'].replace(recode_vehicle_type())
     df['casualty_type'] = np.where(df['casualty_type'] == -1, np.NaN, df['casualty_type'])
-    casualty_modal_type = df.groupby(['accident_reference', 'vehicle_reference'])\
-        ['casualty_type'].agg(lambda x: x.value_counts(dropna=False).index[0]).reset_index()\
+    casualty_modal_type = df[(df['casualty_type'].notnull()) & (df['car_passenger'] == 0)]\
+        .groupby(['accident_reference', 'vehicle_reference'])\
+        ['casualty_type'].agg(lambda x: x.value_counts(dropna=True).index[0]).reset_index()\
         .rename(columns={'casualty_type': 'casualty_modal_type'})
-    # Modal imputation for vehicles with no casualties (or otherwise missing)
-    casualty_modal_type['casualty_modal_type'] = np.where(casualty_modal_type['casualty_modal_type'].isnull(),
-                                                        casualty_modal_type['casualty_modal_type'].value_counts().index[0],
-                                                        casualty_modal_type['casualty_modal_type'])
-    casualty_modal_type['casualty_modal_type'] = casualty_modal_type['casualty_modal_type'].astype(int)
 
     # Main variable to predict: worst casualty of vehicle, either in vehicle itself or pedestrian
     casualty_worst = df.groupby(['accident_reference', 'vehicle_reference'])['casualty_severity'].min().reset_index()\
         .rename(columns={'casualty_severity': 'casualty_worst'})
 
-    df.drop(columns=['casualty_reference', 'casualty_class', 'sex_of_casualty',
+    df.drop(columns=['casualty_reference', 'casualty_class', 'sex_of_casualty', 'car_passenger',
                      'age_of_casualty', 'casualty_severity', 'casualty_type'], inplace=True)
 
     # Actual aggregation
@@ -218,7 +207,6 @@ def cols_to_drop() -> Dict:
             'casualty_home_area_type',
             'lsoa_of_casualty',
             'bus_or_coach_passenger',
-            'car_passenger',
             'age_band_of_casualty']
     }
 
