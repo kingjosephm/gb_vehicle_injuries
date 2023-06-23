@@ -300,7 +300,11 @@ def categorical_features() -> List:
                 'road_surface_conditions',
                 'special_conditions_at_site',
                 'carriageway_hazards',
-                'urban_or_rural_area'
+                'urban_or_rural_area',
+                'dayw',
+                'month',
+                'hour',
+                'accident_year'
             ]
 
 def numerical_features() -> List:
@@ -309,11 +313,7 @@ def numerical_features() -> List:
     :return: list
     """
     return [
-                'accident_year',
-                'month',
                 'day',
-                'dayw',
-                'hour',
                 'elapsed_time',
                 'age_of_driver',
                 'engine_capacity_cc',
