@@ -1,6 +1,8 @@
 import pandas as pd
 from typing import Dict, List
 import numpy as np
+import lightgbm as lgb
+from sklearn.model_selection import train_test_split
 
 pd.set_option('display.max_rows', 150)
 pd.set_option('display.max_columns', 150)
@@ -84,7 +86,44 @@ def read_data() -> pd.DataFrame:
     cats = categorical_features()
     numerics = numerical_features()
     df[cats] = df[cats].astype('category')
-    df = df[cats+numerics+['casualty_worst']]
+    df = df[cats + numerics + ['casualty_worst']]
+
+    # Impute casualty modal type for vehicles with no casualties
+    df = impute_casualty_modal_type(df)
+
+    return df
+
+def impute_casualty_modal_type(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Imputes `casualty_modal_type` for vehicles missing any casualty information. Most cases are for vehicles where no
+        casualty occurred. However, we still want to impute what object they might've struck.
+    :param df: pd.DataFrame
+    :return: pd.DataFrame
+    """
+    # Segment data into rows with missings versus without
+    mi_cas_type = df[df['casualty_modal_type'].isnull()]
+    df_ = df[~df.index.isin(mi_cas_type.index)]
+
+    prediction_features = [i for i in df.columns if "casualty_modal_type" not in i]
+
+    # Train val split
+    X_train, X_val, y_train, y_val = train_test_split(df_[prediction_features],
+                                                      df_['casualty_modal_type'],
+                                                      test_size=0.2,
+                                                      random_state=123,
+                                                      stratify=df_['casualty_modal_type'],
+                                                      shuffle=True)
+
+    # Train classifier model with default params
+    model = lgb.LGBMClassifier(objective="multiclass", random_state=123, n_estimators=100)
+    model.fit(X=X_train, y=y_train, eval_set=[(X_val, y_val)], eval_metric='multi_error',
+              callbacks=[lgb.early_stopping(stopping_rounds=10, verbose=False)])
+
+    # Generate predictions
+    pred = model.predict(mi_cas_type[prediction_features])
+
+    # Replace missing original values with predictions
+    df.loc[df['casualty_modal_type'].isnull(), 'casualty_modal_type'] = pred
 
     return df
 
