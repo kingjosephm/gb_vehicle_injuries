@@ -110,17 +110,6 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     for col in ['casualty_class', 'casualty_severity']:
         df[col] = df[col].astype(int)
 
-    # Share of males among casualties, non-missing only
-    df['sex_of_casualty'] = np.where(df['sex_of_casualty'] == 9, np.NaN, df['sex_of_casualty'])
-    df['sex_of_casualty'].replace({2: 0}, inplace=True)
-    casualty_share_male = df.groupby(['accident_reference', 'vehicle_reference'])\
-        ['sex_of_casualty'].mean().reset_index().rename(columns={'sex_of_casualty': 'casualty_share_male'})
-
-    # Mean age across casualties, non-missing only
-    df['age_of_casualty'] = np.where(df['sex_of_casualty'] == -1, np.NaN, df['age_of_casualty'])
-    casualty_mean_age = df.groupby(['accident_reference', 'vehicle_reference'])\
-        ['age_of_casualty'].mean().reset_index().rename(columns={'age_of_casualty': 'casualty_mean_age'})
-
     # Casualty type, i.e. what did this vehicle hit (note - must explicitly exclude missings here)
     # Excludes vehicle passengers
     df['casualty_type'] = df['casualty_type'].replace(recode_vehicle_type())
@@ -143,8 +132,6 @@ def aggregate_casualty_data(df: pd.DataFrame) -> pd.DataFrame:
     # Concat aggregated columns
     df = df.merge(casualty_worst, how='left')
     df = df.merge(casualty_modal_type, how='left')
-    df = df.merge(casualty_share_male, how='left')
-    df = df.merge(casualty_mean_age, how='left')
 
     # Recode & consolidate casualty_worst down to 3 classes
     recode_casualty_worst = {
@@ -306,8 +293,6 @@ def numerical_features() -> List:
                 'age_of_driver',
                 'engine_capacity_cc',
                 'age_of_vehicle',
-                'casualty_share_male',
-                'casualty_mean_age',
                 'longitude',
                 'latitude',
                 'number_of_vehicles',
